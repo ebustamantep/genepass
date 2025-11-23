@@ -42,14 +42,17 @@ async function generateDeterministicPassword(
     password += allChars[index % allChars.length];
   }
   
-  // Mezclar los caracteres de forma determinística
-  const shuffled = password.split("").sort((a, b) => {
-    const aCode = a.charCodeAt(0);
-    const bCode = b.charCodeAt(0);
-    return (aCode * hashArray[0]) - (bCode * hashArray[1]);
-  }).join("");
+  // Mezclar los caracteres de forma determinística usando Fisher-Yates
+  const chars = password.split("");
+  for (let i = chars.length - 1; i > 0; i--) {
+    // Usar el hash para generar un índice determinístico
+    const hashIndex = (i + hashArray[i % hashArray.length]) % hashArray.length;
+    const j = (hashArray[hashIndex] + hashArray[(hashIndex + 1) % hashArray.length]) % (i + 1);
+    // Intercambiar
+    [chars[i], chars[j]] = [chars[j], chars[i]];
+  }
   
-  return shuffled;
+  return chars.join("");
 }
 
 export default function PasswordGenerator() {
